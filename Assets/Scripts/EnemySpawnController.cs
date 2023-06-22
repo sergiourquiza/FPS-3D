@@ -9,11 +9,11 @@ public class EnemySpawnController : MonoBehaviour
     public float SpawnTime = 60f;
     public float MinSpawnTime = 10f;
     public float SpawnRadius = 5f;
-    private GameObject Player;
+    private GameObject SpawnPoint;
 
     private void Start()
     {
-        Player = GameObject.Find("Player");
+        SpawnPoint = GameObject.Find("SpawnPoint");
         StartCoroutine(SpawnEnemiesRoutine());
     }
 
@@ -39,7 +39,7 @@ public class EnemySpawnController : MonoBehaviour
             int randomIndex = Random.Range(0, EnemieTypes.Length);
             GameObject enemyType = EnemieTypes[randomIndex];
 
-            var spawnPosition = Player.transform.position + Random.insideUnitSphere * SpawnRadius;
+            var spawnPosition = SpawnPoint.transform.position + Random.insideUnitSphere * SpawnRadius;
             spawnPosition.y = 0f;
 
             Instantiate(enemyType, spawnPosition, Quaternion.identity);
