@@ -13,8 +13,7 @@ public class PlayerController : MonoBehaviour
     private float shootDistance = 4f;
     [SerializeField]
     private ParticleSystem shootPS;
-    [SerializeField]
-    private float health;
+    public float health { private set; get; } = 100f;
     
 
     private Rigidbody mRb;
@@ -113,7 +112,7 @@ public class PlayerController : MonoBehaviour
         if (col.CompareTag("Enemigo-Attack"))
         {
             Debug.Log("Player recibio danho");
-            TakeDamage(1f);
+            TakeDamage(4f);
         }
         
     }
