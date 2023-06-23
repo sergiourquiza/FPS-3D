@@ -2,19 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField]
-    private float speed;
-    [SerializeField]
-    private float turnSpeed;
-    [SerializeField]
-    private float shootDistance = 4f;
-    [SerializeField]
-    private ParticleSystem shootPS;
+    [SerializeField] private float speed;
+    [SerializeField] private float turnSpeed;
+    [SerializeField] private float shootDistance = 4f;
+    [SerializeField] private ParticleSystem shootPS;
+    [SerializeField] private ParticleSystem shotGunPS;
+    [SerializeField] private GameObject shotGun;
+    [SerializeField] private GameObject rifle;
+
+    private ParticleSystem particleSystemSetted;
     public float health { private set; get; } = 100f;
-    
+    private bool shotGunState = true;
 
     private Rigidbody mRb;
     private Vector2 mDirection;
@@ -23,6 +26,9 @@ public class PlayerController : MonoBehaviour
     private GameObject debugImpactSphere;
     private GameObject bloodObjectParticles;
     private GameObject otherObjectParticles;
+    private GameObject shotGunParticles;
+
+
 
     private void Start()
     {
@@ -32,6 +38,7 @@ public class PlayerController : MonoBehaviour
         debugImpactSphere = Resources.Load<GameObject>("DebugImpactSphere");
         bloodObjectParticles = Resources.Load<GameObject>("BloodSplat_FX Variant");
         otherObjectParticles = Resources.Load<GameObject>("GunShot_Smoke_FX Variant");
+        shotGunParticles = Resources.Load<GameObject>("VFX_M4 Muzzle Flash");
 
         Cursor.lockState = CursorLockMode.Locked;
     }
@@ -69,24 +76,41 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnSwitch(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            shotGunState = !shotGunState;
+            rifle.SetActive(!shotGunState);
+            shotGun.SetActive(shotGunState);
+        }
+    }
+
     private void Shoot()
     {
-        shootPS.Play();
+        if (shotGunState)
+        {
+            shotGunPS.Play();
+        }
+        else
+        {
+            shootPS.Play();
+        }
 
         RaycastHit hit;
         if (Physics.Raycast(
             cameraMain.position,
             cameraMain.forward,
             out hit,
-            shootDistance
+            shotGunState ? shootDistance : shootDistance * 2f
         ))
         {
             if (hit.collider.CompareTag("Enemigos"))
             {
                 var bloodPS = Instantiate(bloodObjectParticles, hit.point, Quaternion.identity);
-                Destroy(bloodPS, 3f);
+                Destroy(bloodPS, 2f);
                 var enemyController = hit.collider.GetComponent<EnemyController>();
-                enemyController.TakeDamage(1f);
+                enemyController.TakeDamage(shotGunState ? 2.5f : 1f);
             }else
             {
                 var otherPS = Instantiate(otherObjectParticles, hit.point, Quaternion.identity);
@@ -104,6 +128,7 @@ public class PlayerController : MonoBehaviour
         {
             // Fin del juego
             Debug.Log("Fin del juego");
+            SceneManager.LoadScene("Scenes/MainScene");
         }
     }
 
